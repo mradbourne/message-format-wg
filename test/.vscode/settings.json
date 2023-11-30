@@ -1,0 +1,13 @@
+{
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "*.ddt.json"
+            ],
+            "url": "./testgen/ddt.schema.json"
+        }
+    ],
+    "yaml.schemas": {
+        "./testgen/ddt.schema.json": "*.ddt.yml",
+    }
+}
