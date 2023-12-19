@@ -1,0 +1,7 @@
+{
+  "name": "mf2-executor",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test index.mjs"
+  }
+}
