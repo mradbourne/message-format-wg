@@ -44,13 +44,21 @@ def print_error(user_message, err):
 def build_test_json(src_path, tests):
     destination = get_destination_path(src_path, ".test.json")
     build_json(
-        tests, destination, ["label", "description", "locale", "pattern", "inputs"]
+        tests,
+        destination,
+        scenario_fields=["scenario", "description"],
+        test_fields=["label", "description", "locale", "pattern", "inputs"],
     )
 
 
 def build_verify_json(src_path, tests):
     destination = get_destination_path(src_path, ".verify.json")
-    build_json(tests, destination, ["label", "verify"])
+    build_json(
+        tests,
+        destination,
+        scenario_fields=["scenario"],
+        test_fields=["label", "verify"],
+    )
 
 
 def get_destination_path(src_path, file_extension):
@@ -59,12 +67,14 @@ def get_destination_path(src_path, file_extension):
     return Path(os.path.dirname(__file__), "DDT_DATA", rel_dir, basename)
 
 
-def build_json(tests, destination_path, fields):
+def build_json(tests, destination_path, scenario_fields, test_fields):
+    output = {sf: tests.get(sf) for sf in scenario_fields if tests.get(sf) != None}
     verifications = [
-        {field: test.get(field) for field in fields if test.get(field) != None}
+        {tf: test.get(tf) for tf in test_fields if test.get(tf) != None}
         for test in tests["tests"]
     ]
-    output = {"scenario": tests["scenario"], "verifications": verifications}
+    output["verifications"] = verifications
+
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     with open(destination_path, "w") as json_file:
         json.dump(output, json_file, indent=JSON_INDENT)
