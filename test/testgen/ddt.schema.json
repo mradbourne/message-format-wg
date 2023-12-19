@@ -48,7 +48,7 @@
           "type": "array",
           "items": { "$ref": "#/$defs/arg" }
         },
-        "expect": {
+        "verify": {
           "type": "string"
         }
       }
