@@ -29,10 +29,18 @@ def main():
     if args.command == "run":
         if args.build:
             build()
-        print(f"\nSending {args.action} command to {args.executor} executor...")
-        getattr(executors[args.executor], args.action)()
+        run(args.executor, args.action)
     elif args.command == "build":
         build()
+
+
+def run(executor, action):
+    print(f"\nSending {action} command to {executor} executor...")
+    test_pattern = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "DDT_DATA", "**", "*.test.json")
+    )
+    test_files = glob.glob(test_pattern, recursive=True)
+    getattr(executors[executor], action)(test_files)
 
 
 def build():
