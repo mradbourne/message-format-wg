@@ -27,12 +27,19 @@ function runTests({ testFile, verifyFile }) {
       const expected = verifyFile.verifications.find(
         (v) => v.label === test.label
       ).verify;
-      runTest(test, expected);
+
+      switch (testFile.testType) {
+        case "syntax":
+          runSyntaxTest(test, expected);
+          break;
+        default:
+          throw new Error(`Test type "${testFile.testType}" not supported.`);
+      }
     }
   });
 }
 
-function runTest({ label, locale, pattern, inputs }, expected) {
+function runSyntaxTest({ label, locale, pattern, inputs }, expected) {
   it(label, () => {
     const mf = new MessageFormat(pattern, locale);
     const result = mf.format(parseInputs(inputs));

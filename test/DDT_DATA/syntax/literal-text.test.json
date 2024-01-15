@@ -1,6 +1,7 @@
 {
   "scenario": "Literal text",
   "description": "Text placed directly into the pattern",
+  "testType": "syntax",
   "verifications": [
     {
       "label": "Includes basic literals",

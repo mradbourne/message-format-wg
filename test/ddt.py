@@ -35,7 +35,9 @@ def main():
 
     if args.command == "run":
         if args.build:
-            build([get_source_path(file) for file in args.files])
+            build(
+                [get_source_path(file) for file in args.files] if args.files else None
+            )
         execute(args.executor, args.action, args.files)
     elif args.command == "build":
         build([file for file in args.files] if args.files else None)
@@ -43,13 +45,13 @@ def main():
 
 def execute(executor, action, relative_paths):
     print(f"\nSending {action} command to {executor} executor...")
-    full_paths = get_full_paths_default_all(relative_paths, test_build_dir)
+    full_paths = get_full_paths_default_all(relative_paths, "build")
     getattr(executors[executor], action)(full_paths)
 
 
 def build(relative_paths):
     print("\nBuilding JSON from YAML...")
-    full_paths = get_full_paths_default_all(relative_paths, test_src_dir)
+    full_paths = get_full_paths_default_all(relative_paths, "src")
 
     if len(full_paths) == 0:
         print("No tests found.")
@@ -78,11 +80,16 @@ test_src_dir = os.path.join(os.path.dirname(__file__), "testgen", "src")
 test_build_dir = os.path.join(os.path.dirname(__file__), "DDT_DATA")
 
 
-def get_full_paths_default_all(rel_paths, base_dir):
-    os.chdir(test_src_dir)
-    rel_paths = rel_paths or glob.glob("./**/*.ddt.yml", recursive=True)
+def get_full_paths_default_all(rel_paths, path_type):
+    base_dir = test_src_dir if path_type == "src" else test_build_dir
+    path_ext = "*.ddt.yml" if path_type == "src" else "*.test.json"
+    os.chdir(base_dir)
+    rel_paths_or_default = rel_paths or glob.glob(
+        os.path.join("**", path_ext), recursive=True
+    )
     return [
-        os.path.normpath(os.path.join(base_dir, rel_path)) for rel_path in rel_paths
+        os.path.normpath(os.path.join(base_dir, rel_path))
+        for rel_path in rel_paths_or_default
     ]
 
 
@@ -96,7 +103,7 @@ def build_test_json(src_path, tests):
     build_json(
         tests,
         destination,
-        scenario_fields=["scenario", "description"],
+        scenario_fields=["scenario", "description", "testType"],
         test_fields=["label", "description", "locale", "pattern", "inputs"],
     )
 

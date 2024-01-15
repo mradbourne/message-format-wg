@@ -1,6 +1,7 @@
 {
   "scenario": "Whitespace",
   "description": "Leading and trailing space characters",
+  "testType": "syntax",
   "verifications": [
     {
       "label": "Preserves leading space on basic literals",
