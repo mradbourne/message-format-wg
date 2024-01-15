@@ -35,53 +35,55 @@ def main():
 
     if args.command == "run":
         if args.build:
-            build(args.files)
+            build([get_source_path(file) for file in args.files])
         run(args.executor, args.action, args.files)
     elif args.command == "build":
-        build(args.files)
+        build([file for file in args.files] if args.files else None)
 
 
-def run(executor, action, files):
+def run(executor, action, relative_paths):
     print(f"\nSending {action} command to {executor} executor...")
-    test_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "DDT_DATA"))
-    os.chdir(test_dir)
-    test_files = (
-        [os.path.join(test_dir, file) for file in files]
-        if files
-        else glob.glob("./**/*.ddt.yml", recursive=True)
-    )
-    getattr(executors[executor], action)(test_files)
+    full_paths = get_full_paths_default_all(relative_paths, test_build_dir)
+    getattr(executors[executor], action)(full_paths)
 
 
-def build(files):
+def build(relative_paths):
     print("\nBuilding JSON from YAML...")
-    test_dir = os.path.normpath(
-        os.path.join(os.path.dirname(__file__), "testgen", "src")
-    )
-    os.chdir(test_dir)
-    test_files = files or glob.glob("./**/*.ddt.yml", recursive=True)
+    full_paths = get_full_paths_default_all(relative_paths, test_src_dir)
 
-    if len(test_files) == 0:
+    if len(full_paths) == 0:
         print("No tests found.")
 
     schema_path = os.path.join(os.path.dirname(__file__), "testgen", "ddt.schema.json")
     validator = Draft202012Validator(json.load(open(schema_path)))
 
-    for src_path in test_files:
+    for full_path in full_paths:
         try:
-            with open(os.path.join(test_dir, src_path), "r") as file:
+            with open(full_path, "r") as file:
                 tests = safe_load(file)
                 validator.validate(tests)
-                build_test_json(src_path, tests)
-                build_verify_json(src_path, tests)
+                build_test_json(full_path, tests)
+                build_verify_json(full_path, tests)
         except FileNotFoundError as err:
-            print_error(f"Could not find file {src_path}", err)
+            print_error(f"Could not find file {full_path}", err)
         except scanner.ScannerError as err:
-            print_error(f"Could not load content from {src_path}", err)
+            print_error(f"Could not load content from {full_path}", err)
         except ValidationError as err:
-            print_error(f"Could not validate {src_path}", err)
+            print_error(f"Could not validate {full_path}", err)
         except Exception as err:
-            print_error(f"Could not build {src_path}", err)
+            print_error(f"Could not build {full_path}", err)
+
+
+test_src_dir = os.path.join(os.path.dirname(__file__), "testgen", "src")
+test_build_dir = os.path.join(os.path.dirname(__file__), "DDT_DATA")
+
+
+def get_full_paths_default_all(rel_paths, base_dir):
+    os.chdir(test_src_dir)
+    rel_paths = rel_paths or glob.glob("./**/*.ddt.yml", recursive=True)
+    return [
+        os.path.normpath(os.path.join(base_dir, rel_path)) for rel_path in rel_paths
+    ]
 
 
 def print_error(user_message, err):
@@ -109,10 +111,18 @@ def build_verify_json(src_path, tests):
     )
 
 
+def get_source_path(destination_path):
+    rel_dir = os.path.dirname(destination_path)
+    basename = ".ddt.yml".join(
+        os.path.basename(destination_path).rsplit(".test.json", 1)
+    )
+    return Path(test_src_dir, rel_dir, basename)
+
+
 def get_destination_path(src_path, file_extension):
-    rel_dir = os.path.dirname(src_path)
+    full_build_dir = test_build_dir.join(os.path.dirname(src_path).split(test_src_dir))
     basename = file_extension.join(os.path.basename(src_path).rsplit(".ddt.yml", 1))
-    return Path(os.path.dirname(__file__), "DDT_DATA", rel_dir, basename)
+    return Path(full_build_dir, basename)
 
 
 def build_json(tests, destination_path, scenario_fields, test_fields):
