@@ -36,6 +36,12 @@ To build and run with a single command, add the `-b`/`--build` flag:
 python ddt.py run node test -b
 ```
 
+To run a subset of tests, use the `-f`/`--files` flag:
+
+```bash
+python ddt.py run node test -f syntax/whitespace.test.json
+```
+
 ### Creating and registering a new executor
 
 The framework is extendable with new executors.
