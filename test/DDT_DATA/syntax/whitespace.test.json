@@ -1,0 +1,26 @@
+{
+  "scenario": "Whitespace",
+  "description": "Leading and trailing space characters",
+  "verifications": [
+    {
+      "label": "Preserves leading space on basic literals",
+      "locale": "en-US",
+      "pattern": "  hello world"
+    },
+    {
+      "label": "Removes leading space on unquoted literals",
+      "locale": "en-US",
+      "pattern": "hello {  world}"
+    },
+    {
+      "label": "Preserves trailing space on basic literals",
+      "locale": "en-US",
+      "pattern": "hello world  "
+    },
+    {
+      "label": "Removes trailing space on unquoted literals",
+      "locale": "en-US",
+      "pattern": "hello {world  }"
+    }
+  ]
+}

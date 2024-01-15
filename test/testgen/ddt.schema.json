@@ -28,7 +28,7 @@
     "test": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["label", "locale", "pattern", "inputs"],
+      "required": ["label", "locale", "pattern"],
       "properties": {
         "label": {
           "type": "string",

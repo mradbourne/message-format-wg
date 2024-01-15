@@ -1,0 +1,13 @@
+{
+  "scenario": "Literal text",
+  "verifications": [
+    {
+      "label": "Includes basic literals",
+      "verify": "hello world"
+    },
+    {
+      "label": "Includes unquoted literals",
+      "verify": "hello world"
+    }
+  ]
+}

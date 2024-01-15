@@ -1,0 +1,16 @@
+{
+  "scenario": "Literal text",
+  "description": "Text placed directly into the pattern",
+  "verifications": [
+    {
+      "label": "Includes basic literals",
+      "locale": "en-US",
+      "pattern": "hello world"
+    },
+    {
+      "label": "Includes unquoted literals",
+      "locale": "en-US",
+      "pattern": "hello {world}"
+    }
+  ]
+}

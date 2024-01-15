@@ -1,0 +1,21 @@
+{
+  "scenario": "Whitespace",
+  "verifications": [
+    {
+      "label": "Preserves leading space on basic literals",
+      "verify": "  hello world"
+    },
+    {
+      "label": "Removes leading space on unquoted literals",
+      "verify": "hello world"
+    },
+    {
+      "label": "Preserves trailing space on basic literals",
+      "verify": "hello world  "
+    },
+    {
+      "label": "Removes trailing space on unquoted literals",
+      "verify": "hello world"
+    }
+  ]
+}

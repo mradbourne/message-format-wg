@@ -1,0 +1,23 @@
+scenario: Whitespace
+description: Leading and trailing space characters
+testType: syntax
+tests:
+  - label: Preserves leading space on basic literals
+    locale: en-US
+    pattern: "  hello world"
+    verify: "  hello world"
+
+  - label: Removes leading space on unquoted literals
+    locale: en-US
+    pattern: "hello {  world}"
+    verify: "hello world"
+
+  - label: Preserves trailing space on basic literals
+    locale: en-US
+    pattern: "hello world  "
+    verify: "hello world  "
+
+  - label: Removes trailing space on unquoted literals
+    locale: en-US
+    pattern: "hello {world  }"
+    verify: "hello world"
