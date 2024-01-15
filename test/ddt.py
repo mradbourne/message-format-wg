@@ -16,18 +16,18 @@ JSON_INDENT = 2
 
 def main():
     parser = argparse.ArgumentParser()
-    subparser = parser.add_subparsers(dest="command")
-    build_parser = subparser.add_parser("build")
-    run_parser = subparser.add_parser("run")
-
+    subparsers = parser.add_subparsers(dest="command")
+    build_parser = subparsers.add_parser("build")
+    execute_parser = subparsers.add_parser("run")
     build_parser.add_argument(
         "-f", "--files", nargs="+", required=False, help="Source files to build"
     )
-
-    run_parser.add_argument("executor", choices=executors.keys())
-    run_parser.add_argument("action", choices=["init", "test"])
-    run_parser.add_argument("-b", "--build", action=argparse.BooleanOptionalAction)
-    run_parser.add_argument(
+    execute_parser.add_argument("executor", choices=executors.keys())
+    execute_subparsers = execute_parser.add_subparsers(dest="action")
+    execute_subparsers.add_parser("init")
+    test_parser = execute_subparsers.add_parser("test")
+    test_parser.add_argument("-b", "--build", action=argparse.BooleanOptionalAction)
+    test_parser.add_argument(
         "-f", "--files", nargs="+", required=False, help="Test files to run"
     )
 
@@ -36,12 +36,12 @@ def main():
     if args.command == "run":
         if args.build:
             build([get_source_path(file) for file in args.files])
-        run(args.executor, args.action, args.files)
+        execute(args.executor, args.action, args.files)
     elif args.command == "build":
         build([file for file in args.files] if args.files else None)
 
 
-def run(executor, action, relative_paths):
+def execute(executor, action, relative_paths):
     print(f"\nSending {action} command to {executor} executor...")
     full_paths = get_full_paths_default_all(relative_paths, test_build_dir)
     getattr(executors[executor], action)(full_paths)
