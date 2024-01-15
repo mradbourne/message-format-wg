@@ -6,13 +6,7 @@ All operations are performed using the `ddt.py` CLI, which can be found in this 
 
 ## Setup
 
-Navigate to the test directory:
-
-```bash
-cd test/
-```
-
-Install `ddt.py` CLI dependencies:
+From the `test` directory, install `ddt.py` CLI dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -44,11 +38,9 @@ python ddt.py run node test -f syntax/whitespace.test.json
 
 ### Creating and registering a new executor
 
-The framework is extendable with new executors.
-
 #### Creating
 
-Each new executor is placed in the `executors/` directory. It takes the form of a directory with an `__init__.py` file that contains two functions, `init` and `test`.
+The framework is extendable with new executors. Each new executor is placed in the `executors/` directory. It takes the form of a directory with an `__init__.py` file that contains two functions, `init` and `test`.
 
 The `init` function should set up the executor, including any dependency installation and build steps.
 
