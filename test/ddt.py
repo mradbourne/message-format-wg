@@ -17,39 +17,49 @@ JSON_INDENT = 2
 def main():
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest="command")
-    subparser.add_parser("build")
+    build_parser = subparser.add_parser("build")
     run_parser = subparser.add_parser("run")
+
+    build_parser.add_argument(
+        "-f", "--files", nargs="+", required=False, help="Source files to build"
+    )
 
     run_parser.add_argument("executor", choices=executors.keys())
     run_parser.add_argument("action", choices=["init", "test"])
     run_parser.add_argument("-b", "--build", action=argparse.BooleanOptionalAction)
+    run_parser.add_argument(
+        "-f", "--files", nargs="+", required=False, help="Test files to run"
+    )
 
     args = parser.parse_args()
 
     if args.command == "run":
         if args.build:
-            build()
-        run(args.executor, args.action)
+            build(args.files)
+        run(args.executor, args.action, args.files)
     elif args.command == "build":
-        build()
+        build(args.files)
 
 
-def run(executor, action):
+def run(executor, action, files):
     print(f"\nSending {action} command to {executor} executor...")
-    test_pattern = os.path.normpath(
-        os.path.join(os.path.dirname(__file__), "DDT_DATA", "**", "*.test.json")
+    test_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "DDT_DATA"))
+    os.chdir(test_dir)
+    test_files = (
+        [os.path.join(test_dir, file) for file in files]
+        if files
+        else glob.glob("./**/*.ddt.yml", recursive=True)
     )
-    test_files = glob.glob(test_pattern, recursive=True)
     getattr(executors[executor], action)(test_files)
 
 
-def build():
+def build(files):
     print("\nBuilding JSON from YAML...")
     test_dir = os.path.normpath(
         os.path.join(os.path.dirname(__file__), "testgen", "src")
     )
     os.chdir(test_dir)
-    test_files = glob.glob("./**/*.ddt.yml", recursive=True)
+    test_files = files or glob.glob("./**/*.ddt.yml", recursive=True)
 
     if len(test_files) == 0:
         print("No tests found.")
@@ -58,18 +68,20 @@ def build():
     validator = Draft202012Validator(json.load(open(schema_path)))
 
     for src_path in test_files:
-        with open(src_path, "r") as file:
-            try:
+        try:
+            with open(os.path.join(test_dir, src_path), "r") as file:
                 tests = safe_load(file)
                 validator.validate(tests)
                 build_test_json(src_path, tests)
                 build_verify_json(src_path, tests)
-            except scanner.ScannerError as err:
-                print_error(f"Could not load {src_path}", err)
-            except ValidationError as err:
-                print_error(f"Could not validate {src_path}", err)
-            except Exception as err:
-                print_error(f"Could not build {src_path}", err)
+        except FileNotFoundError as err:
+            print_error(f"Could not find file {src_path}", err)
+        except scanner.ScannerError as err:
+            print_error(f"Could not load content from {src_path}", err)
+        except ValidationError as err:
+            print_error(f"Could not validate {src_path}", err)
+        except Exception as err:
+            print_error(f"Could not build {src_path}", err)
 
 
 def print_error(user_message, err):
